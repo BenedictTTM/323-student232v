@@ -11,7 +11,9 @@ import Prime from "../components/home/Prime";
 import LearnCards from "../components/home/LearnCards";
 import CtaSection from "../components/home/CtaSection";
 import Disclaimers from "../components/home/Disclaimers";
+import UnderHero from "../components/home/UnderHero";
 import Footer from "../components/layout/Footer";
+
 
 export default function Home() {
   return (
@@ -19,7 +21,9 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <StocksSection />
+        <UnderHero />
+
+        {/* <StocksSection /> */}
         <DerivativesSection />
         <ExploreTokens />
         <PredictionMarkets />

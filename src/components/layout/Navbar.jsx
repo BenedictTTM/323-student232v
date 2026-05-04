@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import IndividualsMenu from "./IndividualsMenu";
 import BusinessesMenu from "./BusinessesMenu";
 
@@ -13,11 +14,21 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [individualsHovered, setIndividualsHovered] = useState(false);
   const [businessesHovered, setBusinessesHovered] = useState(false);
 
-  const closeAll = () => { setIndividualsHovered(false); setBusinessesHovered(false); };
+  const closeAll = () => {
+    setIndividualsHovered(false);
+    setBusinessesHovered(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   return (
     <header
@@ -49,8 +60,13 @@ export default function Navbar() {
               key={label}
               className="flex items-center"
               onMouseEnter={() => {
-                if (hasDropdown === "individuals") { setIndividualsHovered(true); setBusinessesHovered(false); }
-                else if (hasDropdown === "businesses") { setBusinessesHovered(true); setIndividualsHovered(false); }
+                if (hasDropdown === "individuals") {
+                  setIndividualsHovered(true);
+                  setBusinessesHovered(false);
+                } else if (hasDropdown === "businesses") {
+                  setBusinessesHovered(true);
+                  setIndividualsHovered(false);
+                }
               }}
             >
               {hasDropdown ? (
@@ -69,7 +85,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Right side actions */}
+        {/* Right side — auth aware */}
         <div className="flex items-center gap-3 ml-auto">
           {/* Search */}
           <button
@@ -89,37 +105,45 @@ export default function Navbar() {
             </svg>
           </button>
 
-          {/* Globe */}
-          <button
-            className="hidden sm:flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 transition"
-            aria-label="Language"
-          >
-            <svg
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z" />
-            </svg>
-          </button>
-
-          <Link
-            to="/signin"
-            className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-gray-800 hover:text-blue-600 transition"
-          >
-            Sign in
-          </Link>
-
-          <Link
-            to="/signup"
-            className="inline-flex px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition"
-          >
-            Sign up
-          </Link>
+          {user ? (
+            <>
+              <Link
+                to="/profile"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                  {user.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </div>
+                <span>{user.name?.split(" ")[0]}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/signin"
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-gray-800 hover:text-blue-600 transition"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="inline-flex px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -148,29 +172,56 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-white px-4 pb-4">
-          {navLinks.slice(0, 2).map(({ label, to, hasDropdown }) => (
-            <Link
-              key={label}
-              to={hasDropdown ? "#" : to}
-              className="block py-3 text-base font-medium text-gray-800 border-b border-gray-50"
-              onClick={() => setMobileOpen(false)}
-            >
-              {label}
-            </Link>
-          ))}
-          <div className="flex gap-3 mt-4">
-            <Link
-              to="/signin"
-              className="flex-1 text-center py-2 text-sm font-semibold bg-gray-100 rounded-full"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/signup"
-              className="flex-1 text-center py-2 text-sm font-semibold text-white bg-blue-600 rounded-full"
-            >
-              Sign up
-            </Link>
+          {navLinks
+            .filter(({ to }) => to)
+            .map(({ label, to }) => (
+              <Link
+                key={label}
+                to={to}
+                className="block py-3 text-base font-medium text-gray-800 border-b border-gray-50"
+                onClick={() => setMobileOpen(false)}
+              >
+                {label}
+              </Link>
+            ))}
+          <div className="flex flex-col gap-2 mt-4">
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="text-sm font-medium text-gray-700 py-2"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileOpen(false);
+                  }}
+                  className="text-sm font-medium text-gray-700 py-2 text-left cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/signin"
+                  className="flex-1 text-center py-2 text-sm font-semibold bg-gray-100 rounded-full"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="flex-1 text-center py-2 text-sm font-semibold text-white bg-blue-600 rounded-full"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
