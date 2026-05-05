@@ -104,6 +104,11 @@ export default function SignIn() {
             />
           </div>
 
+          {/* Demo note */}
+          <p className="mb-4 text-center text-xs text-amber-400 bg-amber-900/20 border border-amber-700/40 rounded-lg px-3 py-2">
+            🎓 Demo app – do not use your real password
+          </p>
+
           {/* Submit */}
           <button
             id="signin-submit-btn"

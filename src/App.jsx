@@ -5,12 +5,16 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import WarningBanner from "./components/layout/WarningBanner";
+import DemoDisclaimer from "./components/layout/DemoDisclaimer";
 import { individualsRoutes } from "./pages/Individuals/individualsRoutes";
 import { businessesRoutes } from "./pages/Businesses/businessesRoutes";
 
 function App() {
   return (
-    <Routes>
+    <>
+      <WarningBanner />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="cryptocurrencies" element={<Explore />} />
       <Route path="signup" element={<SignUp />} />
@@ -42,6 +46,8 @@ function App() {
         />
       ))}
     </Routes>
+      <DemoDisclaimer />
+    </>
   );
 }
 
